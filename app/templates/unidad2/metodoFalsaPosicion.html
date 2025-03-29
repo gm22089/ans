@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Falsa Posicion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    
+    <a id="btn-inicio" href="{{ url_for('hello_world') }}">Inicio</a>
+
+
+    <h2>Método de la Falsa Posicion</h2>
+    <form action="{{ url_for('unidad2.m_falsaPosicion') }}" method="POST">
+        <label for="ecuacionFP">Ecuacion:</label>
+        <input type="text" name="ecuacionFP" required>
+        <br><br>
+        <label for="aFP">Valor de a:</label>
+        <input type="number" step="any" name="aFP" required>
+        <br><br>
+        <label for="bFP">Valor de b:</label>
+        <input type="number" step="any" name="bFP" required>
+        <br><br>
+        <label for="toleranciaFP">Tolerancia:</label>
+        <input type="number" step="any" name="toleranciaFP" required>
+        <br><br>
+
+        <button type="submit">Calcular</button>
+    </form>
+    {% if resultado is defined %}
+    <h3>Resultado del método de bisección:</h3>
+    <pre>{{ resultado }}</pre>
+    {% endif %}
+
+</body>
+</html>

@@ -1,14 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Página Principal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
 </head>
 <body>
-    <h1>HELLO WORLD</h1>
-    <ul>
-        <li><a href="unidad2/biseccion.html">Biseccion</a></li>
-    </ul>
+    <h1>Bienvenido a la Calculadora de Métodos Numéricos</h1>
+    
+    <nav>
+        <ul>
+            <a href="{{ url_for('unidad2.mostrar_biseccion') }}">Método de Bisección</a>
+
+            <li><a href="/metodoFalsaPosicion">Método de la Falsa Posición</a></li>
+        </ul>
+    </nav>
 </body>
 </html>
