@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Método de Bisección (AJAX)</title>
+    <title>Método de Bisección</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ url_for('static', filename='js/ajaxBiseccion.js') }}"></script>
@@ -22,7 +22,7 @@
     {% endblock %}
 
     <a id="btn-inicio" href="{{ url_for('hello_world') }}">Inicio</a>
-    <h2>Método de Bisección</h2>
+    <h1>Método de Bisección</h1>
 
     <div class="content">
         <div class="main">
@@ -31,7 +31,7 @@
             </div>
             <form action="/unidad2/biseccion-json" id="formBiseccion" method="POST">
                 <div>
-                    <p>Función: <span id="math-field"></span></p>
+                    <p>Función: <span id="math-field" class="math-input"></span></p>
                     <p><span id="latex"></span></p>
                     <!-- Campo oculto para enviar la ecuación en formato LaTeX -->
                     <input type="hidden" name="ecuacion" id="ecuacion">

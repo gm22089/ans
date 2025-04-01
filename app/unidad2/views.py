@@ -37,20 +37,25 @@ def biseccion_json():
 # MUESTRA EL METODO DE LA FALSA POSICION
 
 
-@unidad2.route('/metodoFalsaPosicion', methods=['GET', 'POST'])
-def m_falsaPosicion():
-    from .metodoFalsaPosicion import falsaPosicion
-    if request.method == 'POST':
-        try:
-            # Obtener datos del formulario
-            ecuacion = request.form['ecuacionFP']
-            a = float(request.form['aFP'])
-            b = float(request.form['bFP'])
-            tol = float(request.form['toleranciaFP'])
-            resultado = falsaPosicion(ecuacion, a, b, tol)
-            # Devuelve respuesta al cliente
-            return render_template('unidad2/metodoFalsaPosicion.html', resultado=resultado)
-        except ValueError:
-            return ("Error en los valores ingresados")
+@unidad2.route('/falsPosion', methods=['GET'])
+def mostrar_FalsaPosicion():
+    keyboard_content = render_template('KeyboardMath.html', time=time.time())
+    return render_template('unidad2/metodoFalsaPosicion.html', keyboard_content=keyboard_content, time=time.time())
 
-    return render_template('unidad2/metodoFalsaPosicion.html')
+
+@unidad2.route('/falsaP-json', methods=['POST'])
+def falsaPosicion_json():
+    from .metodoFalsaPosicion import falsaPosicion
+    try:
+        data = request.get_json()  # Captura el JSON enviado desde el cliente
+
+        ecuacion = data['ecuacion']
+        a = float(data['a'])
+        b = float(data['b'])
+        tol = float(data['tolerancia'])
+        print(ecuacion)
+        resultado = falsaPosicion(ecuacion, a, b, tol)
+        return resultado
+
+    except (ValueError, KeyError):
+        return jsonify({'error': 'Datos inválidos o incompletos'}), 400

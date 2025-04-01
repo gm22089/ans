@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    $('#formBiseccion').on('submit', function(event) {
+    $('#fromFP').on('submit', function(event) {
         event.preventDefault();
 
         const data = {
@@ -12,7 +12,7 @@ $(document).ready(function() {
 
         $.ajax({
             type: 'POST',
-            url: '/unidad2/biseccion-json',
+            url: '/unidad2/falsaP-json',
             contentType: 'application/json',
             data: JSON.stringify(data),
             success: function(resultado) {

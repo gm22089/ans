@@ -3,35 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Falsa Posicion</title>
+    <title>Método de Falsa Posicion.</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/ajaxFalsaPosicion.js') }}"></script>
+
+    <!-- Importa Mathquill -->
+    <link rel="stylesheet" href="/static/matquill/mathquill.css">
+ 
+    <link rel="stylesheet" href="{{ url_for('static', filename='styleKeyboard.css' ) }}?v={{ time }}">
+
+    <!-- Script Base JS -->
+    <script src="/static/funciones.js" async></script>
 </head>
-<body>
-    
+<body>  
+    {% block keyboard %}
+    {{ keyboard_content | safe }}
+    {% endblock %}
+
     <a id="btn-inicio" href="{{ url_for('hello_world') }}">Inicio</a>
+    <h1>Método de la Falsa Posicion.</h1>
 
+    <div class="content">
+        <div class="main">
+            <div class="descripcion">
+                <p>Ingrese los datos para calcular la raíz de la función</p>
+            </div>
+            <form action="/unidad2/falsaP-json" id="fromFP" method="POST">
+                <div>
+                    <p>Función: <span id="math-field" class="math-input"></span></p>
+                    <p><span id="latex"></span></p>
+                    <!-- Campo oculto para enviar la ecuación en formato LaTeX -->
+                    <input type="hidden" name="ecuacion" id="ecuacion">
+                </div>
 
-    <h2>Método de la Falsa Posicion</h2>
-    <form action="{{ url_for('unidad2.m_falsaPosicion') }}" method="POST">
-        <label for="ecuacionFP">Ecuacion:</label>
-        <input type="text" name="ecuacionFP" required>
-        <br><br>
-        <label for="aFP">Valor de a:</label>
-        <input type="number" step="any" name="aFP" required>
-        <br><br>
-        <label for="bFP">Valor de b:</label>
-        <input type="number" step="any" name="bFP" required>
-        <br><br>
-        <label for="toleranciaFP">Tolerancia:</label>
-        <input type="number" step="any" name="toleranciaFP" required>
-        <br><br>
+                <label for="a">Valor de a:</label>
+                <input type="number" step="any" name="a" id="a" required>
+                <br><br>
 
-        <button type="submit">Calcular</button>
-    </form>
-    {% if resultado is defined %}
-    <h3>Resultado del método de bisección:</h3>
-    <pre>{{ resultado }}</pre>
-    {% endif %}
+                <label for="b">Valor de b:</label>
+                <input type="number" step="any" id="b" name="b" required>
+                <br><br>
 
+                <label for="tol">Tolerancia:</label>
+                <input type="number" step="any" name="tol" id="tolerancia" required>
+                <br><br>
+
+                <button type="submit">Calcular</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="resultado"></div>
+    
+    <script type="text/javascript" src="/static/matquill/mathquill.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var MQ = MathQuill.getInterface(2); // Versión compatible de MathQuill
+            var mathFieldSpan = document.getElementById('math-field');
+            var latexSpan = document.getElementById('latex');
+
+            var mathField = MQ.MathField(mathFieldSpan, {
+                spaceBehavesLikeTab: true,
+                handlers: {
+                    edit: function () {
+                        latexSpan.textContent = mathField.latex(); // Muestra la ecuación
+                        $('#ecuacion').val(mathField.latex()); // Guarda el valor en el campo oculto
+                    }
+                }
+            });
+
+            // Añadir funcionalidad a los botones del panel matemático
+            $('.math-button').on('click', function () {
+                var symbol = $(this).data('symbol');
+                mathField.write(symbol);
+                mathField.focus({ focusVisible: true });
+            });
+        });
+    </script>
 </body>
 </html>
