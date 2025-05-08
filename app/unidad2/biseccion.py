@@ -7,55 +7,75 @@ from app.unidad2.utilidades.utils import Utilidades
 
 def biseccion(ecuacion, a, b, tolerancia):
     """
-    Implementa el método de bisección para encontrar la raíz de una ecuación.
+    Aplica el método de bisección para encontrar una raíz de la función dada en formato LaTeX.
 
-    :param ecuacion: Ecuación en formato LaTeX.
-    :param a: Límite inferior del intervalo.
-    :param b: Límite superior del intervalo.
-    :param tolerancia: Tolerancia aceptable para el error porcentual.
-    :return: JSON con los resultados de cada iteración o mensaje de error.
+    :param ecuacion: Cadena LaTeX que representa la ecuación a resolver.
+    :param a: Límite inferior del intervalo de búsqueda.
+    :param b: Límite superior del intervalo de búsqueda.
+    :param tolerancia: Error porcentual aceptable para detener el algoritmo.
+    :return: Lista de resultados por iteración o mensaje de error en formato JSON.
     """
 
-    # Crear instancias de la clase Utilidades para cálculos de error y manejo de ecuaciones
-    errorP = Utilidades()
-    ecuacionR = Utilidades()
-    x = sympy.symbols('x')  # Definir el símbolo 'x' para la ecuación
+    utilidad = Utilidades()
 
-    try:
-        # Convertir la ecuación en formato LaTeX a una función interpretable por SymPy
-        funcion = ecuacionR.latex_(ecuacion)
-        print(funcion)  # Mostrar la ecuación convertida en consola para depuración
-        # Convertir la ecuación en una función evaluable
-        f = sympy.lambdify(x, funcion)
-    except ZeroDivisionError:
-        return jsonify({"error": "La división entre cero da infinito. Verifique su denominador."})
-    except sympy.SympifyError:
-        return jsonify({"error": "Error en la sintaxis de su ecuación."})
-    except Exception as e:
-        return jsonify({"error": f"Error en la ecuación: {e}"})
+    # Validar y convertir la ecuación de LaTeX a una función evaluable
+    validarEcuacion = utilidad.latex_(ecuacion)
+    if "error" in validarEcuacion:
+        return jsonify({"error": validarEcuacion["error"]})
+    funcion = validarEcuacion["ok"]["funcion"]
+    f = validarEcuacion["ok"]["f"]
+    print(f"El String de la ecuación modificada:\n{funcion}")
 
-    # Verificar que la función cambia de signo en el intervalo dado
-    if f(a) * f(b) >= 0:
-        return jsonify({"error": "El intervalo no es válido. La función debe cambiar de signo en el rango dado."})
+    # Validar el extremo izquierdo del intervalo (a)
+    validarA = utilidad.validarNumero(a)
+    if "error" in validarA:
+        return jsonify({"error": validarA["error"]})
+    Xi = validarA["ok"]
 
-    # Inicializar variables del método de bisección
-    Xi = a  # Extremo izquierdo del intervalo
-    X2 = b  # Extremo derecho del intervalo
-    Xr = (Xi + X2) / 2  # Punto medio del intervalo
-    anterior = 0  # Valor previo de Xr para calcular error
-    resultados = []  # Lista para almacenar los resultados de cada iteración
+    # Validar el extremo derecho del intervalo (b)
+    validarB = utilidad.validarNumero(b)
+    if "error" in validarB:
+        return jsonify({"error": validarB["error"]})
+    X2 = validarB["ok"]
 
-    for i in range(20):  # Máximo de 20 iteraciones
-        # Calcular error porcentual en iteraciones posteriores a la primera
-        Ea = errorP.errorPorcentual(Xr, anterior) if i > 0 else None
+    # Validar que los extremos del intervalo no sean iguales
+    validarIntervalos = utilidad.validarIntervalos(Xi, X2)
+    if "error" in validarIntervalos:
+        return jsonify({"error": validarIntervalos["error"]})
 
-        try:
-            Fi = f(Xi)  # Evaluar la función en Xi
-            F2 = f(Xr)  # Evaluar la función en Xr
-        except Exception as e:
-            return jsonify({"error": f"Error en la evaluación de la función: {e}"})
+    # Validar la tolerancia
+    validarTolerancia = utilidad.validarTolerancia(tolerancia)
+    if "error" in validarTolerancia:
+        return jsonify({"error": validarTolerancia["error"]})
+    toleranciaValidada = validarTolerancia["ok"]
 
-        # Guardar los resultados de la iteración actual
+    # Verificar que haya un cambio de signo entre los extremos del intervalo
+    if f(Xi) * f(X2) >= 0:
+        return jsonify({"error": "El intervalo no es válido.\nLa función debe cambiar de signo en el rango dado."})
+
+    Xr = (Xi + X2) / 2  # Punto medio inicial
+    anterior = 0  # Para almacenar el valor anterior de Xr y calcular el error
+    resultados = []  # Lista para almacenar los datos de cada iteración
+
+    for i in range(30):  # Limitar a un máximo de 30 iteraciones
+        if i + 1 == 30:
+            return jsonify({"error": "El número de iteraciones ha excedido el límite permitido."})
+
+        # Calcular el error porcentual relativo (excepto en la primera iteración)
+        Ea = utilidad.errorPorcentual(Xr, anterior) if i > 0 else None
+
+        # Evaluar la función en los extremos actuales
+        evaluarPuntoA = utilidad.evaluarPunto(f, Xi)
+        evaluarPuntoB = utilidad.evaluarPunto(f, Xr)
+        if "error" in evaluarPuntoA:
+            return jsonify({"error": evaluarPuntoA["error"]})
+        if "error" in evaluarPuntoB:
+            return jsonify({"error": evaluarPuntoB["error"]})
+
+        Fi = evaluarPuntoA["ok"]
+        F2 = evaluarPuntoB["ok"]
+
+        # Guardar resultados de la iteración actual
         resultados.append({
             "iteracion": i + 1,
             "Xi": round(Xi, 6),
@@ -67,17 +87,17 @@ def biseccion(ecuacion, a, b, tolerancia):
             "error": "-----" if Ea is None else round(Ea, 6)
         })
 
-        # Si el error es menor que la tolerancia, detener la iteración
-        if Ea is not None and Ea < tolerancia:
+        # Verificar si se ha alcanzado la tolerancia deseada
+        if Ea is not None and Ea < toleranciaValidada:
             break
 
-        # Actualizar el intervalo según el método de bisección
+        # Actualizar el intervalo dependiendo del signo del producto f(Xi)*f(Xr)
         if Fi * F2 < 0:
-            X2 = Xr  # La raíz está en la izquierda del intervalo
+            X2 = Xr
         else:
-            Xi = Xr  # La raíz está en la derecha del intervalo
+            Xi = Xr
 
-        anterior = Xr  # Guardar el valor de Xr anterior
-        Xr = (Xi + X2) / 2  # Calcular nuevo Xr como el punto medio
+        anterior = Xr
+        Xr = (Xi + X2) / 2  # Nuevo punto medio
 
-    return jsonify(resultados)  # Devolver resultados en formato JSON
+    return jsonify(resultados)

@@ -42,6 +42,8 @@ def mostrar_FalsaPosicion():
     keyboard_content = render_template('KeyboardMath.html', time=time.time())
     return render_template('unidad2/metodoFalsaPosicion.html', keyboard_content=keyboard_content, time=time.time())
 
+# Devuelve el resultado de Falsa Posicion
+
 
 @unidad2.route('/falsaP-json', methods=['POST'])
 def falsaPosicion_json():
@@ -55,6 +57,32 @@ def falsaPosicion_json():
         tol = float(data['tolerancia'])
         print(ecuacion)
         resultado = falsaPosicion(ecuacion, a, b, tol)
+        return resultado
+
+    except (ValueError, KeyError):
+        return jsonify({'error': 'Datos inválidos o incompletos'}), 400
+
+# MUESTRA EL METODO DE LA PUNTO FIJO
+
+
+@unidad2.route('/puntoFijo', methods=['GET'])
+def mostrar_puntoFijo():
+    keyboard_content = render_template('KeyboardMath.html', time=time.time())
+    return render_template('unidad2/puntoFijo.html', keyboard_content=keyboard_content, time=time.time())
+# Devuelve el resultado de Punto Fijo
+
+
+@unidad2.route('/puntoFijo-json', methods=['POST'])
+def puntoFijo_json():
+    from .puntoFijo import puntoFijo
+    try:
+        data = request.get_json()  # Captura el JSON enviado desde el cliente
+
+        ecuacion = data['ecuacion']
+        a = float(data['a'])
+        tol = float(data['tolerancia'])
+        print(ecuacion)
+        resultado = puntoFijo(ecuacion, a, tol)
         return resultado
 
     except (ValueError, KeyError):

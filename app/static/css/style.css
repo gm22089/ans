@@ -123,3 +123,31 @@ pre {
 .tabla tr:hover {
     background-color: #ddd;
 }
+.seccion {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-top: 20px;
+    background-color: #f9f9f9;
+}
+
+.toggle-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.toggle-buttons button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #005eff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+.toggle-buttons button:hover {
+    background-color: #0040cc;
+}

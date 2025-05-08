@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Método del Punto Fijo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/ajaxPuntoFijo.js') }}"></script>
+
+    <!-- Importa Mathquill -->
+    <link rel="stylesheet" href="/static/matquill/mathquill.css">
+ 
+    <link rel="stylesheet" href="{{ url_for('static', filename='styleKeyboard.css' ) }}?v={{ time }}">
+
+    <!-- Script Base JS -->
+    <script src="/static/funciones.js" async></script>
+</head>
+<body>  
+    {% block keyboard %}
+    {{ keyboard_content | safe }}
+    {% endblock %}
+
+    <a id="btn-inicio" href="{{ url_for('hello_world') }}">Inicio</a>
+    <h1>Método del Punto Fijo</h1>
+
+    <div class="content">
+        <div class="main">
+            <div class="descripcion">
+                <p>Ingrese los datos para calcular la raíz de la función</p>
+            </div>
+            <form action="/unidad2/biseccion-json" id="formPuntoFijo" method="POST">
+                <div>
+                    <p>Función: <span id="math-field" class="math-input"></span></p>
+                    <p><span id="latex"></span></p>
+                    <!-- Campo oculto para enviar la ecuación en formato LaTeX -->
+                    <input type="hidden" name="ecuacion" id="ecuacion">
+                </div>
+
+                <label for="a">Valor del punto a evaluar:</label>
+                <input type="number" step="any" name="a" id="a" required>
+                <br><br>
+
+
+                <label for="tol">Tolerancia:</label>
+                <input type="number" step="any" name="tol" id="tolerancia" required>
+                <br><br>
+
+                <button type="submit">Calcular</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="resultado"></div>
+    
+    <script type="text/javascript" src="/static/matquill/mathquill.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var MQ = MathQuill.getInterface(2); // Versión compatible de MathQuill
+            var mathFieldSpan = document.getElementById('math-field');
+            var latexSpan = document.getElementById('latex');
+
+            var mathField = MQ.MathField(mathFieldSpan, {
+                spaceBehavesLikeTab: true,
+                handlers: {
+                    edit: function () {
+                        latexSpan.textContent = mathField.latex(); // Muestra la ecuación
+                        $('#ecuacion').val(mathField.latex()); // Guarda el valor en el campo oculto
+                    }
+                }
+            });
+
+            // Añadir funcionalidad a los botones del panel matemático
+            $('.math-button').on('click', function () {
+                var symbol = $(this).data('symbol');
+                mathField.write(symbol);
+                mathField.focus({ focusVisible: true });
+            });
+        });
+    </script>
+</body>
+</html>

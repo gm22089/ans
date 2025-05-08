@@ -8,15 +8,16 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ url_for('static', filename='js/ajaxBiseccion.js') }}"></script>
 
-    <!-- Importa Mathquill -->
+    <!-- MathQuill -->
     <link rel="stylesheet" href="/static/matquill/mathquill.css">
- 
-    <link rel="stylesheet" href="{{ url_for('static', filename='styleKeyboard.css' ) }}?v={{ time }}">
+    <script type="text/javascript" src="/static/matquill/mathquill.js"></script>
 
-    <!-- Script Base JS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styleKeyboard.css') }}?v={{ time }}">
+
+    <!-- Script base -->
     <script src="/static/funciones.js" async></script>
 </head>
-<body>  
+<body>
     {% block keyboard %}
     {{ keyboard_content | safe }}
     {% endblock %}
@@ -24,42 +25,69 @@
     <a id="btn-inicio" href="{{ url_for('hello_world') }}">Inicio</a>
     <h1>Método de Bisección</h1>
 
-    <div class="content">
-        <div class="main">
-            <div class="descripcion">
-                <p>Ingrese los datos para calcular la raíz de la función</p>
-            </div>
-            <form action="/unidad2/biseccion-json" id="formBiseccion" method="POST">
-                <div>
-                    <p>Función: <span id="math-field" class="math-input"></span></p>
-                    <p><span id="latex"></span></p>
-                    <!-- Campo oculto para enviar la ecuación en formato LaTeX -->
-                    <input type="hidden" name="ecuacion" id="ecuacion">
-                </div>
-
-                <label for="a">Valor de a:</label>
-                <input type="number" step="any" name="a" id="a" required>
-                <br><br>
-
-                <label for="b">Valor de b:</label>
-                <input type="number" step="any" id="b" name="b" required>
-                <br><br>
-
-                <label for="tol">Tolerancia:</label>
-                <input type="number" step="any" name="tol" id="tolerancia" required>
-                <br><br>
-
-                <button type="submit">Calcular</button>
-            </form>
-        </div>
+     <!-- 🔘 Botones para alternar -->
+     <div class="toggle-buttons">
+        <button onclick="mostrarSeccion('info')">Ver Explicación</button>
+        <button onclick="mostrarSeccion('interactivo')">Ir al Método</button>
     </div>
 
+    <!-- 🔷 Sección de Información -->
+    <section id="info-section" class="seccion">
+        <h2>¿Qué es el Método de Bisección?</h2>
+        <p>Este método tiene su fundamento teórico en el <strong>Teorema del Valor Intermedio</strong>. Se basa en establecer un intervalo cerrado (a,b) en el cual la función es continua. Se deben buscar los valores que hagan que f(a) y f(b) tengan signos contrarios, es decir, que f(a)*f(b)&lt;0, asegurando así que existe al menos una raíz dentro del intervalo.</p>
+        
+        <p>La fórmula principal es:</p>
+        <p><strong>Xr = (a + b)/2</strong></p>
+
+        <h3>Paso a Paso del Algoritmo:</h3>
+        <ol>
+            <li>Escoger valores iniciales <em>a</em> (inferior) y <em>b</em> (superior) que encierren la raíz tal que f(a)·f(b) &lt; 0.</li>
+            <li>Calcular la primera aproximación con la fórmula: <strong>Xr = (a + b)/2</strong>.</li>
+            <li>Evaluar f(Xr) y determinar en qué subintervalo se encuentra la raíz:
+                <ul>
+                    <li>Si f(a)·f(Xr) &lt; 0 → la raíz está entre <em>a</em> y <em>Xr</em>.</li>
+                    <li>Si f(a)·f(Xr) &gt; 0 → la raíz está entre <em>Xr</em> y <em>b</em>.</li>
+                    <li>Si f(Xr) = 0 → Xr es la raíz exacta.</li>
+                </ul>
+            </li>
+            <li>Repetir hasta que el error absoluto sea menor o igual a la tolerancia dada.</li>
+        </ol>
+    </section>
+
+    <!-- 🔷 Sección Interactiva -->
+    <section id="interactive-section" class="seccion" style="display: none;">
+        <div class="content">
+            <div class="main">
+                <div class="descripcion">
+                    <p>Ingrese los datos para calcular la raíz de la función</p>
+                </div>
+                <form action="/unidad2/biseccion-json" id="formBiseccion" method="POST">
+                    <!-- Campo de función -->
+                    <div>
+                        <p>Función: <span id="math-field" class="math-input"></span></p>
+                        <p><span id="latex"></span></p>
+                        <input type="hidden" name="ecuacion" id="ecuacion">
+                    </div>
+                    <!-- Campos numéricos -->
+                    <label for="a">Valor de a:</label>
+                    <input type="number" step="any" name="a" id="a" required><br><br>
+                    <label for="b">Valor de b:</label>
+                    <input type="number" step="any" id="b" name="b" required><br><br>
+                    <label for="tol">Tolerancia:</label>
+                    <input type="number" step="any" name="tol" id="tolerancia" required><br><br>
+                    <button type="submit">Calcular</button>
+                </form>
+            </div>
+        </div>
+        <div id="resultado"></div>
+    </section>
+
     <div id="resultado"></div>
-    
-    <script type="text/javascript" src="/static/matquill/mathquill.js"></script>
+
+    <!-- 🔷 Script MathQuill -->
     <script type="text/javascript">
         $(document).ready(function () {
-            var MQ = MathQuill.getInterface(2); // Versión compatible de MathQuill
+            var MQ = MathQuill.getInterface(2);
             var mathFieldSpan = document.getElementById('math-field');
             var latexSpan = document.getElementById('latex');
 
@@ -67,13 +95,12 @@
                 spaceBehavesLikeTab: true,
                 handlers: {
                     edit: function () {
-                        latexSpan.textContent = mathField.latex(); // Muestra la ecuación
-                        $('#ecuacion').val(mathField.latex()); // Guarda el valor en el campo oculto
+                        latexSpan.textContent = mathField.latex();
+                        $('#ecuacion').val(mathField.latex());
                     }
                 }
             });
 
-            // Añadir funcionalidad a los botones del panel matemático
             $('.math-button').on('click', function () {
                 var symbol = $(this).data('symbol');
                 mathField.write(symbol);
@@ -81,5 +108,22 @@
             });
         });
     </script>
+
+
+<script>
+    function mostrarSeccion(seccion) {
+        const info = document.getElementById('info-section');
+        const interactivo = document.getElementById('interactive-section');
+    
+        if (seccion === 'info') {
+            info.style.display = 'block';
+            interactivo.style.display = 'none';
+        } else {
+            info.style.display = 'none';
+            interactivo.style.display = 'block';
+        }
+    }
+    </script>
+    
 </body>
 </html>
